@@ -25,6 +25,11 @@
             android:enabled="true"
             android:exported="true" >
         </receiver>
+
+        <activity
+            android:name=".Communication"
+            android:label="@string/title_activity_communication" >
+        </activity>
     </application>
 
 </manifest>

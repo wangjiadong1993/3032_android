@@ -108,8 +108,7 @@ public class Main extends Activity {
         pairedDevices = BA.getBondedDevices();
         for(BluetoothDevice bt : pairedDevices)
             list.add(bt.getName());
-        final ArrayAdapter adapter = new ArrayAdapter
-                (this,android.R.layout.simple_list_item_1, list);
+        final ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1, list);
         lv.setAdapter(adapter);
 
 
@@ -163,36 +162,12 @@ public class Main extends Activity {
 
     private void connect_device(String device)
     {
-        int start = device.indexOf('|');
-        String mac = device.substring(start+1);
-        Log.d("MAC", mac);
-        bt_device = BA.getRemoteDevice(mac);
-        Log.d("info", "connection start");
-        try {
-
-            bt_socket = bt_device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-        }
-        catch(IOException e)
-        {
-            Log.e("connection failed", "connection failed");
-        }
-        Log.d("info", "connection succeeded"
-        );
-        try {
-            bt_socket.connect();
-            Log.e("Tag", " BT connection established, data transfer link open.");
-            manage_socket(bt_socket);//自定义函数进行蓝牙通信处理
-
-        } catch (IOException e) {
-            Log.e("Tag", " Connection failed.", e);
-            setTitle("连接失败..");
-        }
+        Intent intent_new= new Intent(this, Communication.class);
+        intent_new.putExtra("Device", device);
+        startActivity(intent_new);
 
     }
-    private void manage_socket(BluetoothSocket bt_socket)
-    {
 
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
