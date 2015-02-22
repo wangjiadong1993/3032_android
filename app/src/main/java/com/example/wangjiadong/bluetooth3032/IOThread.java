@@ -1,9 +1,12 @@
 package com.example.wangjiadong.bluetooth3032;
 
 import android.bluetooth.BluetoothSocket;
+import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 /**
@@ -13,14 +16,12 @@ public class IOThread extends Thread {
     private final BluetoothSocket mmSocket;
     private final InputStream mmInStream;
     private final OutputStream mmOutStream;
-
+    public Valuereturn vr;
+    //private String output;
     public IOThread(BluetoothSocket socket) {
         mmSocket = socket;
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
-
-        // Get the input and output streams, using temp objects because
-        // member streams are final
         try {
             tmpIn = socket.getInputStream();
             tmpOut = socket.getOutputStream();
@@ -29,19 +30,26 @@ public class IOThread extends Thread {
         mmInStream = tmpIn;
         mmOutStream = tmpOut;
     }
+    public void init(Valuereturn vr){
+        this.vr = vr;
+    }
 
     public void run() {
         byte[] buffer = new byte[1024];  // buffer store for the stream
         int bytes; // bytes returned from read()
+        String output ;
+        Log.d("Info", "it is the sub thread");
 
-        // Keep listening to the InputStream until an exception occurs
         while (true) {
             try {
                 // Read from the InputStream
-                bytes = mmInStream.read(buffer);
+                bytes = mmInStream.read();
+                if(bytes != 0 && bytes != -1)
+                {
+                    Log.d("input found", String.valueOf((char)bytes));
+                }
                 // Send the obtained bytes to the UI activity
-                mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
-                        .sendToTarget();
+                //.obtainMessage(MESSAGE_READ, bytes, -1, buffer).sendToTarget();
             } catch (IOException e) {
                 break;
             }

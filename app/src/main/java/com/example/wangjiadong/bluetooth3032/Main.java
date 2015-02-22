@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -89,6 +90,7 @@ public class Main extends Activity {
         lstDevices = new ArrayList();
         adtDevices = new ArrayAdapter(this, android.R.layout.simple_list_item_1, lstDevices);
         lv1.setAdapter(adtDevices);
+
        // lstDevices.add("initial one");
        // adtDevices.notifyDataSetChanged();
 

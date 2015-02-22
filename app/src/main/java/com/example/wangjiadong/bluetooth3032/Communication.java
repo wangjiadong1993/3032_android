@@ -6,25 +6,56 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import android.os.Parcelable;
 
-
-public class Communication extends Activity {
+public class Communication extends Activity{
     private int connection_status = 0;
     private BluetoothDevice bt_device;
     private BluetoothSocket bt_socket;
-    private InputStream is;
-    private OutputStream os;
+    private String name;
+    private ArrayList msg_list;
+    private ArrayList msg_back;
+    private ArrayAdapter msg_adt;
+    private IORUN io_thread=null;
+    private ListView lv =null;
+    private String temp="";
+    private Handler mHandler;
+    private void show_temp(String input){
+        Log.d("str len", Integer.toString(input.length()));
+        if(input.equals("\n"))
+        {
+            Log.d("total", temp+'\n');
+            msg_list.add(temp);
+            //msg_adt.notifyDataSetChanged();
+            temp = "";
+            Log.d("main thread", Looper.getMainLooper().getThread().toString());
+            Log.d("current thread", Thread.currentThread().toString());
+
+
+        }
+        else
+        {
+            temp =temp + input.charAt(0);
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,27 +65,66 @@ public class Communication extends Activity {
         Button send = (Button) findViewById(R.id.send);
         Log.d("device", device);
         connect_device(device);
-        try
-        {
-            is = bt_socket.getInputStream();
-            os = bt_socket.getOutputStream();
-        }catch(IOException e)
-        {
 
-        }
+        lv = (ListView) findViewById(R.id.list_msg);
+        msg_list = new ArrayList();
+        msg_back = new ArrayList();
+        msg_list.add(0, "hello world");
+        msg_adt = new ArrayAdapter(this, android.R.layout.simple_list_item_1, msg_list);
+        lv.setAdapter(msg_adt);
+
+
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 EditText et = (EditText) findViewById(R.id.message);
                 String message = et.getText().toString();
                 Log.d("info", "interrupted");
+                if(message != null)
+                {
+                    io_thread.write((message).getBytes());
+                    msg_list.add(0, "me: "+message);
+                    msg_adt.notifyDataSetChanged();
+                    et.setText(null);
+                }
             }
         });
+        mHandler = new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                Log.d("info", "get a message");
+                Log.d("Msg", msg.toString());
+                Log.d("current thread", Thread.currentThread().toString());
+                char a = (char)msg.what;
+                if(a == '\r') {
+//                    msg_back.clear();
+//                    msg_back.addAll(msg_list);
+//                    msg_back.add(temp);
+//                    msg_list.clear();
+//                    //lv.invalidate();
+//                    msg_adt.clear();
+//                    msg_list.addAll(msg_back);
+//                    //msg_adt.addAll(msg_list);
+//                    msg_adt.add(temp);
+//                    msg_adt.notifyDataSetChanged();
+                    temp = name+": " + temp;
+                    update_view(temp);
+                    Log.d("print", temp);
+                    temp = "";
+                    Log.d("array list", msg_list.toString());
+                }
+                else{
+                    temp = temp + (char) msg.what;
+                }
+
+            }
+        };
     }
     private void connect_device(String device)
     {
         int start = device.indexOf('|');
         String mac = device.substring(start+1);
+        name = device.substring(0, start-1);
         Log.d("MAC", mac);
         bt_device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(mac);
         Log.d("info", "connection start");
@@ -79,9 +149,19 @@ public class Communication extends Activity {
         }
     }
 
+    private void update_view(String temp)
+    {
+        msg_list.add(0, temp);
+        msg_adt = new ArrayAdapter(this, android.R.layout.simple_list_item_1, msg_list);
+        lv.invalidate();
+        lv.setAdapter(msg_adt);
+
+
+    }
     private void manage_socket(BluetoothSocket bt_socket)
     {
-
+        io_thread = new IORUN(bt_socket);
+        io_thread.start();
     }
 
     @Override
@@ -90,6 +170,8 @@ public class Communication extends Activity {
         getMenuInflater().inflate(R.menu.communication, menu);
         return true;
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -101,5 +183,61 @@ public class Communication extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+
+    private class IORUN extends Thread {
+        private final BluetoothSocket mmSocket;
+        private final InputStream mmInStream;
+        private final OutputStream mmOutStream;
+        //private String output;
+        public IORUN(BluetoothSocket socket) {
+            mmSocket = socket;
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+            try {
+                tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
+            } catch (IOException e) { }
+
+            mmInStream = tmpIn;
+            mmOutStream = tmpOut;
+        }
+
+        public void run() {
+            byte[] buffer = new byte[1024];  // buffer store for the stream
+            int bytes; // bytes returned from read()
+            String output ;
+            Log.d("Info", "it is the sub thread");
+
+            while (true) {
+                try {
+                    // Read from the InputStream
+                    bytes = mmInStream.read();
+                    if(bytes != 0 && bytes != -1)
+                    {
+                        Log.d("input found", String.valueOf((char)bytes));
+                        mHandler.obtainMessage(bytes).sendToTarget();
+                    }
+                } catch (IOException e) {
+                    break;
+                }
+            }
+        }
+
+        /* Call this from the main activity to send data to the remote device */
+        public void write(byte[] bytes) {
+            try {
+                mmOutStream.write(bytes);
+            } catch (IOException e) { }
+        }
+
+        /* Call this from the main activity to shutdown the connection */
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (IOException e) { }
+        }
     }
 }
