@@ -8,8 +8,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,9 +23,23 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,20 +52,27 @@ public class Main extends Activity {
     private ArrayAdapter adtDevices;
     private BluetoothDevice bt_device;
     private BluetoothSocket bt_socket;
-
+    private GetGeo get_thread = null;
+    private Handler mainhandler = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
+        final ListView lv1 = (ListView) findViewById(R.id.listView2);
+        Button location = (Button) findViewById(R.id.get_location);
 
         //adding the bluetooth adaptor;
         BA = BluetoothAdapter.getDefaultAdapter();
         final Button show_devices = (Button) findViewById(R.id.show_devices);
-        Button show = (Button) findViewById(R.id.show_pair);
+        //Button show = (Button) findViewById(R.id.show_pair);
 
-
+        mainhandler = new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+              Log.d("what", Integer.toString(msg.what));
+                Log.d("info", msg.obj.toString());
+          }
+        };
 
 
         //check availability and status
@@ -61,7 +86,7 @@ public class Main extends Activity {
         }
 
 
-
+        //this part is the turn on turn off button of the BT, and its reaction
         Button button =(Button) findViewById(R.id.bluetooth);
         //visibility
         if(bt_status == -1)
@@ -78,6 +103,8 @@ public class Main extends Activity {
                     startActivityForResult(turnOn, 0);
                 }else{
                     bt_status = 0;
+                    adtDevices.clear();
+                    lstDevices.clear();
                     BA.disable();//directly
                 }
                 set_visible(show_devices);
@@ -86,13 +113,11 @@ public class Main extends Activity {
 
 
         //
-        final ListView lv1 = (ListView) findViewById(R.id.listView2);
+
         lstDevices = new ArrayList();
         adtDevices = new ArrayAdapter(this, android.R.layout.simple_list_item_1, lstDevices);
         lv1.setAdapter(adtDevices);
 
-       // lstDevices.add("initial one");
-       // adtDevices.notifyDataSetChanged();
 
         lv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -105,29 +130,14 @@ public class Main extends Activity {
 
 
 
-        final ListView lv =  (ListView) findViewById(R.id.listView1);
+        //final ListView lv =  (ListView) findViewById(R.id.listView1);
         ArrayList list = new ArrayList();
         pairedDevices = BA.getBondedDevices();
         for(BluetoothDevice bt : pairedDevices)
             list.add(bt.getName());
-        final ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1, list);
-        lv.setAdapter(adapter);
+        //final ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1, list);
+        //lv.setAdapter(adapter);
 
-
-        show.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if(lv.getVisibility() == View.VISIBLE)
-                {
-                    Log.d("status", "hidden");
-                    lv.setVisibility(View.INVISIBLE);
-                }else{
-                    Log.d("status", "shown");
-                    lv.setVisibility(View.VISIBLE);
-                }
-            }
-        });
 
         show_devices.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,6 +146,18 @@ public class Main extends Activity {
             }
         });
 
+        location.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                double latitude = 1.03;
+                double longitude  = 107.0;
+                String uri = String.format(Locale.ENGLISH, "geo:%f,%f", latitude, longitude);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                get_thread = new GetGeo("http://128.199.213.135/locations/new");
+                get_thread.start();
+                //Main.this.startActivity(intent);
+            }
+        });
 
     }
 
@@ -143,9 +165,9 @@ public class Main extends Activity {
     private void set_visible(Button show_devices){
         if(bt_status == 1)
         {
-            show_devices.setVisibility(View.VISIBLE);
+            show_devices.setEnabled(true);
         }else{
-            show_devices.setVisibility(View.INVISIBLE);
+            show_devices.setEnabled(false);
         }
     }
 
@@ -204,5 +226,66 @@ public class Main extends Activity {
             }
         }
     };
+    private class GetGeo extends Thread {
+        HttpClient httpclient = new DefaultHttpClient();
+        HttpResponse response;
+        String responseString = null;
+        private String url = null;
+        private String lati = null;
+        private String longi = null;
+        private String time_date = null;
+        public GetGeo(String uni) {
+            url = uni;
+        }
+
+        public void run() {
+            JSONObject temp=null;
+            Log.d("Info", "it is the sub thread");
+            try {
+                response = httpclient.execute(new HttpGet(url));
+                StatusLine statusLine = response.getStatusLine();
+                if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+                    Log.d("Correct","Correct");
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    response.getEntity().writeTo(out);
+                    out.close();
+                    responseString = out.toString();
+                    Log.d("Correct",responseString);
+                } else {
+                    //Closes the connection.
+                    response.getEntity().getContent().close();
+                  //  Log.d("info", "in else");
+                    throw new IOException(statusLine.getReasonPhrase());
+                }
+            } catch (ClientProtocolException e) {
+                Log.d("Wrong","Cought by ClientProtocolException");
+            } catch (IOException e) {
+                Log.d("Wrong", "IOException");
+            }
+            try {
+                JSONObject jo = new JSONObject(responseString);
+                if(jo.getString("status").equals("1"))
+                {
+                    temp = jo.getJSONObject("location");
+                    lati = temp.getString("latitude");
+                    longi = temp.getString("longitude");
+                    time_date = temp.getString("created_at");
+                }
+                mainhandler.obtainMessage(1, lati+","+longi+","+time_date).sendToTarget();
+            }catch(JSONException e)
+            {
+
+            }
+        }
+
+        /* Call this from the main activity to send data to the remote device */
+        public void write(byte[] bytes) {
+
+        }
+
+        /* Call this from the main activity to shutdown the connection */
+        public void cancel() {
+        }
+    }
 }
 

@@ -97,16 +97,6 @@ public class Communication extends Activity{
                 Log.d("current thread", Thread.currentThread().toString());
                 char a = (char)msg.what;
                 if(a == '\r') {
-//                    msg_back.clear();
-//                    msg_back.addAll(msg_list);
-//                    msg_back.add(temp);
-//                    msg_list.clear();
-//                    //lv.invalidate();
-//                    msg_adt.clear();
-//                    msg_list.addAll(msg_back);
-//                    //msg_adt.addAll(msg_list);
-//                    msg_adt.add(temp);
-//                    msg_adt.notifyDataSetChanged();
                     temp = name+": " + temp;
                     update_view(temp);
                     Log.d("print", temp);
@@ -229,7 +219,8 @@ public class Communication extends Activity{
         /* Call this from the main activity to send data to the remote device */
         public void write(byte[] bytes) {
             try {
-                mmOutStream.write(bytes);
+                for(int i = 0; i<bytes.length; i++)
+                    mmOutStream.write(bytes[i]);
             } catch (IOException e) { }
         }
 
