@@ -22,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -70,7 +71,9 @@ public class Main extends Activity {
             @Override
             public void handleMessage(Message msg){
               Log.d("what", Integer.toString(msg.what));
-                Log.d("info", msg.obj.toString());
+              Log.d("info", msg.obj.toString());
+              Toast.makeText(Main.this, msg.obj.toString(), Toast.LENGTH_LONG).show();
+              Main.this.get_location(msg.obj.toString());
           }
         };
 
@@ -161,7 +164,6 @@ public class Main extends Activity {
 
     }
 
-
     private void set_visible(Button show_devices){
         if(bt_status == 1)
         {
@@ -170,6 +172,9 @@ public class Main extends Activity {
             show_devices.setEnabled(false);
         }
     }
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -190,6 +195,15 @@ public class Main extends Activity {
         intent_new.putExtra("Device", device);
         startActivity(intent_new);
 
+    }
+
+    private void get_location(String str)
+    {
+        double latitude = 1.03;
+        double longitude  = 107.0;
+        String uri = String.format(Locale.ENGLISH, "geo:%f,%f", latitude, longitude);
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+        Main.this.startActivity(intent);
     }
 
 
