@@ -16,6 +16,7 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.Arrays;
+import java.util.Random;
 
 
 public class Test extends Activity {
@@ -45,7 +46,12 @@ public class Test extends Activity {
                 new DataPoint(3,2.97),
                 new DataPoint(4,6.0)
         };
-        dp = append(dp, new DataPoint(5, 8));
+        Random rd = new Random();
+        for(int i = 0; i<=8000; i++)
+        {
+            dp = append(dp, new DataPoint(i+5, rd.nextInt(10)));
+        }
+
         LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(dp);
 
         graph.addSeries(series);
