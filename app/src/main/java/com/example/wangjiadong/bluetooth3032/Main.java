@@ -64,9 +64,9 @@ public class Main extends Activity {
         Button location = (Button) findViewById(R.id.get_location);
 
 
-//        //for test only
-//        Intent intent = new Intent(this, Test.class);
-//        startActivity(intent);
+        //for test only
+        Intent intent = new Intent(this, Test.class);
+        startActivity(intent);
 
         //adding the bluetooth adaptor;
         BA = BluetoothAdapter.getDefaultAdapter();
