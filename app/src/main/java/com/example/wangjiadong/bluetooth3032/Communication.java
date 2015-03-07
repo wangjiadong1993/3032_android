@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.UUID;
 import android.os.Parcelable;
 
@@ -44,6 +45,7 @@ public class Communication extends Activity{
     private String temp="";
     private Handler mHandler;
     private SQLiteDatabase db;
+    private Shoeload sl;
     private void show_temp(String input){
         Log.d("str len", Integer.toString(input.length()));
         if(input.equals("\n"))
@@ -102,11 +104,24 @@ public class Communication extends Activity{
         mHandler = new Handler(){
             @Override
             public void handleMessage(Message msg){
+                double a_db;
+                double b_db;
+                double c_db;
+                double d_db;
+                int e_db;
                 Log.d("info", "get a message");
                 Log.d("Msg", msg.toString());
                 Log.d("current thread", Thread.currentThread().toString());
                 char a = (char)msg.what;
                 if(a == '\r') {
+                    Scanner sc = new Scanner(temp);
+                    a_db = sc.nextDouble();
+                    b_db = sc.nextDouble();
+                    c_db = sc.nextDouble();
+                    d_db = sc.nextDouble();
+                    e_db = sc.nextInt();
+                    sl = new Shoeload(a_db, b_db, c_db, d_db, e_db);
+                    insert_data(sl);
                     temp = name+": " + temp;
                     update_view(temp);
                     Log.d("print", temp);
