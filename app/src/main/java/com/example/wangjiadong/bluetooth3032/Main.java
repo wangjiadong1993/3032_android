@@ -55,12 +55,18 @@ public class Main extends Activity {
     private BluetoothSocket bt_socket;
     private GetGeo get_thread = null;
     private Handler mainhandler = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final ListView lv1 = (ListView) findViewById(R.id.listView2);
         Button location = (Button) findViewById(R.id.get_location);
+
+
+//        //for test only
+//        Intent intent = new Intent(this, Test.class);
+//        startActivity(intent);
 
         //adding the bluetooth adaptor;
         BA = BluetoothAdapter.getDefaultAdapter();

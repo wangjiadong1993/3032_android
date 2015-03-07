@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Handler;
@@ -26,6 +29,8 @@ import java.util.List;
 import java.util.UUID;
 import android.os.Parcelable;
 
+import com.activeandroid.ActiveAndroid;
+
 public class Communication extends Activity{
     private int connection_status = 0;
     private BluetoothDevice bt_device;
@@ -38,6 +43,7 @@ public class Communication extends Activity{
     private ListView lv =null;
     private String temp="";
     private Handler mHandler;
+    private SQLiteDatabase db;
     private void show_temp(String input){
         Log.d("str len", Integer.toString(input.length()));
         if(input.equals("\n"))
@@ -65,6 +71,10 @@ public class Communication extends Activity{
         Button send = (Button) findViewById(R.id.send);
         Log.d("device", device);
         connect_device(device);
+
+        db = openOrCreateDatabase("shoeload.db", Context.MODE_PRIVATE, null);
+        refresh_db();
+
 
         lv = (ListView) findViewById(R.id.list_msg);
         msg_list = new ArrayList();
@@ -148,6 +158,29 @@ public class Communication extends Activity{
 
 
     }
+
+    public void refresh_db()
+    {
+        db.execSQL("DROP TABLE IF EXISTS shoeload");
+        db.execSQL("CREATE TABLE shoeload (_id INTEGER PRIMARY KEY AUTOINCREMENT, front DOUBLE, middle DOUBLE, rare DOUBLE, temp DOUBLE, time DOUBLE)");
+    }
+    public void insert_data(Shoeload sl)
+    {
+        db.execSQL("INSERT INTO shoeload VALUES (NULL, ?, ?, ? , ?, ?)", new Object[]{sl.front, sl.middle, sl.rare, sl.temp, sl.time});
+    }
+    public void show_all_data()
+    {
+        Cursor c = db.rawQuery("SELECT * FROM shoeload WHERE front >= ?", new String[]{"0.0"});
+        while(c.moveToNext()){
+            int _id = c.getInt(c.getColumnIndex("_id"));
+            double middle = c.getDouble(c.getColumnIndex("middle"));
+            Log.d("result from db", Integer.toString(_id)+"  "+Double.toString(middle));
+        }
+        c.close();
+    }
+
+
+
     private void manage_socket(BluetoothSocket bt_socket)
     {
         io_thread = new IORUN(bt_socket);
