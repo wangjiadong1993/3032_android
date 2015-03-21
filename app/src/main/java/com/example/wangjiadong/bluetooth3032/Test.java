@@ -15,12 +15,13 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
 
 public class Test extends Activity {
-
+    SQLiteDatabase db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,23 +39,48 @@ public class Test extends Activity {
         //Loadata ld = new Loadata();
         //ld.save_load(1.0, 2.0, 3.0, 4.0,"2010");
         GraphView graph = (GraphView) findViewById(R.id.graph);
+        db = openOrCreateDatabase("shoeload.db", Context.MODE_PRIVATE, null);
+        if( db == null)
+                Log.d("Info_Test", "database closed");
+        else
+                Log.d("Info_Test", "Database started");
 
-        DataPoint[] dp =new DataPoint[]{
-                new DataPoint(0,1.25),
-                new DataPoint(1,5.24),
-                new DataPoint(2,3.89),
-                new DataPoint(3,2.97),
-                new DataPoint(4,6.0)
-        };
-        Random rd = new Random();
-        for(int i = 0; i<=8000; i++)
-        {
-            dp = append(dp, new DataPoint(i+5, rd.nextInt(10)));
+//        DataPoint[] dp =new DataPoint[]{
+//                new DataPoint(0, 7),
+//                new DataPoint(1, 5),
+//                new DataPoint(2,4)
+//        };
+
+        ArrayList<DataPoint> dp_a = new ArrayList<DataPoint>();
+        dp_a.add(new DataPoint(0,2));
+        //dp_a.add(new DataPoint(1,5));
+
+//        Random rd = new Random();
+//        for(int i = 0; i<=8000; i++)
+//        {
+//            dp = append(dp, new DataPoint(i+5, rd.nextInt(10)));
+//        }
+        //get_data_points(dp);
+        //append(dp, new DataPoint(3, 10));
+
+        int i = 1;
+        double sum_up =0.0;
+        Cursor c = db.rawQuery("SELECT * FROM shoeload", null);
+        while(c.moveToNext()){
+            sum_up = c.getDouble(c.getColumnIndex("front")) +c.getDouble(c.getColumnIndex("middle"))+c.getDouble(c.getColumnIndex("rare"));
+            //Log.d("Info", c.getInt(c.getColumnIndex("_id"))+ " "+ sum_up + " ");
+            //append(dp, new DataPoint(i, sum_up/300));
+            dp_a.add(new DataPoint(i, sum_up/1000));
+            i++;
         }
 
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(dp);
+        DataPoint[] dp = dp_a.toArray(new DataPoint[dp_a.size()]);
 
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(dp);
+        Log.d("Lala", Integer.toString(dp.length));
         graph.addSeries(series);
+        Log.d("finished","finished redering");
+        //show_all_data(db);
         //graph.addSeries(new LineGraphSeries<DataPoint>());
 
     }
@@ -99,9 +125,23 @@ public class Test extends Activity {
         while(c.moveToNext()){
             int _id = c.getInt(c.getColumnIndex("_id"));
             double middle = c.getDouble(c.getColumnIndex("middle"));
-            Log.d("result from db", Integer.toString(_id)+"  "+Double.toString(middle));
+            double front  = c.getDouble(c.getColumnIndex("front"));
+            double rare = c.getDouble(c.getColumnIndex("rare"));
+            //Log.d("result from db", Integer.toString(_id)+"  "+Double.toString(middle+ front + rare));
         }
         c.close();
+    }
+    public void get_data_points(DataPoint[] dp)
+    {
+        int i = 1;
+        Cursor c = db.rawQuery("SELECT * FROM shoeload", null);
+        while(c.moveToNext()){
+            double sum_up = c.getDouble(c.getColumnIndex("front")) +c.getDouble(c.getColumnIndex("middle"))+c.getDouble(c.getColumnIndex("rare"));
+            //Log.d("Info", c.getInt(c.getColumnIndex("_id"))+ " "+ sum_up + " ");
+            append(dp, new DataPoint(i, sum_up));
+            i++;
+        }
+
     }
 
 }

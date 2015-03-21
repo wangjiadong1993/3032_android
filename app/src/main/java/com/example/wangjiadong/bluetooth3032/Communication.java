@@ -108,25 +108,30 @@ public class Communication extends Activity{
                 double b_db;
                 double c_db;
                 double d_db;
+                String temp_db;
                 int e_db;
-                Log.d("info", "get a message");
-                Log.d("Msg", msg.toString());
-                Log.d("current thread", Thread.currentThread().toString());
+               // Log.d("info", "get a message");
+                //Log.d("Msg", msg.toString());
+                //Log.d("current thread", Thread.currentThread().toString());
                 char a = (char)msg.what;
                 if(a == '\r') {
-                    Scanner sc = new Scanner(temp);
-                    a_db = sc.nextDouble();
-                    b_db = sc.nextDouble();
-                    c_db = sc.nextDouble();
-                    d_db = sc.nextDouble();
-                    e_db = sc.nextInt();
-                    sl = new Shoeload(a_db, b_db, c_db, d_db, e_db);
+                    e_db = temp.indexOf(' ');
+                    temp_db=temp.substring(e_db);
+                    Scanner sc = new Scanner(temp_db);
+                    a_db = (double)sc.nextInt();
+                    b_db = (double)sc.nextInt();
+                    c_db = (double)sc.nextInt();
+                    d_db = (double)sc.nextInt();
+                    //e_db = sc.nextInt();
+                    sl = new Shoeload(a_db, b_db, c_db, d_db, 0);//timer tempery
                     insert_data(sl);
-                    temp = name+": " + temp;
-                    update_view(temp);
-                    Log.d("print", temp);
+                    //temp = name+": " + temp;
+                    //update_view(temp);
+                    //Log.d("print", temp);
+                    Log.d("Database", "Inserted");
                     temp = "";
-                    Log.d("array list", msg_list.toString());
+                    //Log.d("array list", msg_list.toString());
+                    //Log.d("data:", a_db + " " + b_db + " " + c_db + " " + d_db);
                 }
                 else{
                     temp = temp + (char) msg.what;
@@ -134,6 +139,16 @@ public class Communication extends Activity{
 
             }
         };
+        Button cb = (Button) findViewById(R.id.chart);
+        cb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Communication.this , Test.class);
+                db.close();
+                Log.d("Info", "DataBase already closed.");
+                startActivity(intent);
+            }
+        });
     }
     private void connect_device(String device)
     {
