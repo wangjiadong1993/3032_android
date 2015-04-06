@@ -66,8 +66,8 @@ public class Main extends Activity {
 
 
         //for test only
-//        Intent intent = new Intent(this, Test.class);
-//        startActivity(intent);
+        //Intent intent = new Intent(this, Communication.class);
+        //startActivity(intent);
 
         //adding the bluetooth adaptor;
         BA = BluetoothAdapter.getDefaultAdapter();

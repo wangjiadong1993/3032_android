@@ -89,16 +89,16 @@ public class Communication extends Activity{
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText et = (EditText) findViewById(R.id.message);
-                String message = et.getText().toString();
-                Log.d("info", "interrupted");
-                if(message != null)
-                {
-                    io_thread.write((message).getBytes());
-                    msg_list.add(0, "me: "+message);
-                    msg_adt.notifyDataSetChanged();
-                    et.setText(null);
-                }
+                //EditText et = (EditText) findViewById(R.id.message);
+                //String message = et.getText().toString();
+                //Log.d("info", "interrupted");
+                //if(message != null)
+               // {
+                    io_thread.write("A\n".getBytes());
+                    //msg_list.add(0, "me: "+message);
+                    //msg_adt.notifyDataSetChanged();
+                   // et.setText(null);
+                //}
             }
         });
         mHandler = new Handler(){
@@ -149,6 +149,28 @@ public class Communication extends Activity{
                 startActivity(intent);
             }
         });
+        Button wb = (Button) findViewById(R.id.weight);
+        wb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                io_thread.write("B\n".getBytes());
+            }
+        });
+        Button tb = (Button) findViewById(R.id.step);
+        tb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                io_thread.write("C\n".getBytes());
+            }
+        });
+        Button fb = (Button) findViewById(R.id.finish);
+        fb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                io_thread.cancel();
+            }
+        });
+
     }
     private void connect_device(String device)
     {
