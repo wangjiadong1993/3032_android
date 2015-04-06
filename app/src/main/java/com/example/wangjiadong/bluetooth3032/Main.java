@@ -41,6 +41,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 
@@ -79,7 +80,12 @@ public class Main extends Activity {
               Log.d("what", Integer.toString(msg.what));
               Log.d("info", msg.obj.toString());
               Toast.makeText(Main.this, msg.obj.toString(), Toast.LENGTH_LONG).show();
-              Main.this.get_location(msg.obj.toString());
+
+                Scanner sc = new Scanner(msg.obj.toString());
+                float la = (float)sc.nextDouble();
+                float lo = (float)sc.nextDouble();
+                Log.d("Info:",la + "  "+ lo);
+              Main.this.get_location(msg.obj.toString(),la, lo);
           }
         };
 
@@ -160,7 +166,9 @@ public class Main extends Activity {
             public void onClick(View v) {
                 double latitude = 1.03;
                 double longitude  = 107.0;
-                String uri = String.format(Locale.ENGLISH, "geo:%f,%f", latitude, longitude);
+                //String uri = String.format(Locale.ENGLISH, "geo:0,0?q=%f,%f", latitude, longitude);
+                String uri = String.format(Locale.ENGLISH, "http://128.199.213.135?saddr=%f,%f", latitude, longitude);
+
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                 get_thread = new GetGeo("http://128.199.213.135/locations/new");
                 get_thread.start();
@@ -203,10 +211,12 @@ public class Main extends Activity {
 
     }
 
-    private void get_location(String str)
+    private void get_location(String str, float a, float b)
     {
         double latitude = 1.03;
         double longitude  = 107.0;
+        latitude = a;
+        longitude = b;
         String uri = String.format(Locale.ENGLISH, "geo:%f,%f", latitude, longitude);
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
         Main.this.startActivity(intent);
@@ -291,7 +301,7 @@ public class Main extends Activity {
                     longi = temp.getString("longitude");
                     time_date = temp.getString("created_at");
                 }
-                mainhandler.obtainMessage(1, lati+","+longi+","+time_date).sendToTarget();
+                mainhandler.obtainMessage(1, lati+" "+longi).sendToTarget();
             }catch(JSONException e)
             {
 
