@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 import android.os.Parcelable;
+import android.widget.Switch;
 
 import com.activeandroid.ActiveAndroid;
 
@@ -46,6 +47,7 @@ public class Communication extends Activity{
     private Handler mHandler;
     private SQLiteDatabase db;
     private Shoeload sl;
+    private int command = 0;
     private void show_temp(String input){
         Log.d("str len", Integer.toString(input.length()));
         if(input.equals("\n"))
@@ -71,7 +73,6 @@ public class Communication extends Activity{
         String device = intent.getStringExtra("Device");
         setContentView(R.layout.activity_communication);
         Button send = (Button) findViewById(R.id.send);
-        Log.d("device", device);
         connect_device(device);
 
         db = openOrCreateDatabase("shoeload.db", Context.MODE_PRIVATE, null);
@@ -89,49 +90,98 @@ public class Communication extends Activity{
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //EditText et = (EditText) findViewById(R.id.message);
-                //String message = et.getText().toString();
-                //Log.d("info", "interrupted");
-                //if(message != null)
-               // {
+                    command = 1;
                     io_thread.write("A\n".getBytes());
-                    //msg_list.add(0, "me: "+message);
-                    //msg_adt.notifyDataSetChanged();
-                   // et.setText(null);
-                //}
+
             }
         });
         mHandler = new Handler(){
             @Override
             public void handleMessage(Message msg){
                 double a_db;
-                double b_db;
-                double c_db;
-                double d_db;
+                int b_db;
                 String temp_db;
                 int e_db;
-               // Log.d("info", "get a message");
-                //Log.d("Msg", msg.toString());
-                //Log.d("current thread", Thread.currentThread().toString());
                 char a = (char)msg.what;
+
+                //Log.d("lalala", "this is handler");
                 if(a == '\r') {
-                    e_db = temp.indexOf(' ');
-                    temp_db=temp.substring(e_db);
-                    Scanner sc = new Scanner(temp_db);
-                    a_db = (double)sc.nextInt();
-                    b_db = (double)sc.nextInt();
-                    c_db = (double)sc.nextInt();
-                    d_db = (double)sc.nextInt();
-                    //e_db = sc.nextInt();
-                    sl = new Shoeload(a_db, b_db, c_db, d_db, 0);//timer tempery
-                    insert_data(sl);
-                    //temp = name+": " + temp;
-                    //update_view(temp);
-                    //Log.d("print", temp);
-                    Log.d("Database", "Inserted");
-                    temp = "";
-                    //Log.d("array list", msg_list.toString());
-                    //Log.d("data:", a_db + " " + b_db + " " + c_db + " " + d_db);
+
+                    char a_temp = temp.charAt(0);
+                    temp = temp.substring(1);
+                    Scanner sc = new Scanner(temp);
+                    if(a_temp == 'L')
+                    {
+                        a_db = (double) sc.nextDouble();
+                        sl = new Shoeload(a_db, 0, 0, 0, 0);//timer tempery
+                        insert_data(sl);
+                        update_view("Load "+a_db);
+                        temp = "";
+                        //Log.d("data:", a_db + "  ");
+                    }
+                    else if(a_temp == 'W')
+                    {
+                        //Log.d("JD", "this is command 2");
+                        a_db = (double) sc.nextDouble();
+                        update_view("Weight "+a_db);
+                        temp="";
+                    }
+                    else if(a_temp == 'T')
+                    {
+                        b_db = sc.nextInt();
+                        update_view("Step "+b_db);
+                        temp="";
+                    }
+                    else if(a_temp == 'S')
+                    {
+                        Switch ss = (Switch) findViewById(R.id.switch2);
+                        b_db = sc.nextInt();
+                        if(b_db ==1)
+                            ss.setChecked(true);
+                        else
+                            ss.setChecked(false);
+                        temp="";
+
+                    }
+                    else if(a_temp == 'E')
+                    {
+                        Switch hs = (Switch) findViewById(R.id.switch1);
+                        b_db = sc.nextInt();
+                        if(b_db ==1)
+                            hs.setChecked(true);
+                        else
+                            hs.setChecked(false);
+                        temp="";
+                    }
+                    else if(a_temp == 'H')
+                    {
+                        Switch es = (Switch) findViewById(R.id.switch1);
+                        b_db = sc.nextInt();
+                        if(b_db ==1)
+                            es.setChecked(true);
+                        else
+                            es.setChecked(false);
+                        temp="";
+                    }
+                    temp="";
+//                    if(command ==1) {
+//                        //e_db = temp.indexOf(' ');
+//                        //temp_db = temp.substring(e_db);
+//                        Scanner sc = new Scanner(temp);
+//                        a_db = (double) sc.nextDouble();
+//                        sl = new Shoeload(a_db, 0, 0, 0, 0);//timer tempery
+//                        insert_data(sl);
+//                        Log.d("Database", "Inserted");
+//                        temp = "";
+//                        Log.d("data:", a_db + "  ");
+//                    }
+//                    else if(command == 2)
+//                    {
+//                        //msg_list.add(0, temp);
+//                        Log.d("JD", "this is command 2");
+//                        update_view("oops failed");
+//                        temp="";
+//                    }
                 }
                 else{
                     temp = temp + (char) msg.what;
@@ -153,6 +203,7 @@ public class Communication extends Activity{
         wb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                command = 2;
                 io_thread.write("B\n".getBytes());
             }
         });
@@ -160,6 +211,7 @@ public class Communication extends Activity{
         tb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                command = 3;
                 io_thread.write("C\n".getBytes());
             }
         });
@@ -167,6 +219,7 @@ public class Communication extends Activity{
         fb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //command = 3;
                 io_thread.cancel();
             }
         });
@@ -200,7 +253,6 @@ public class Communication extends Activity{
             setTitle("连接失败..");
         }
     }
-
     private void update_view(String temp)
     {
         msg_list.add(0, temp);
@@ -210,7 +262,6 @@ public class Communication extends Activity{
 
 
     }
-
     public void refresh_db()
     {
         db.execSQL("DROP TABLE IF EXISTS shoeload");
@@ -230,29 +281,19 @@ public class Communication extends Activity{
         }
         c.close();
     }
-
-
-
     private void manage_socket(BluetoothSocket bt_socket)
     {
         io_thread = new IORUN(bt_socket);
         io_thread.start();
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.communication, menu);
         return true;
     }
-
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
@@ -284,12 +325,13 @@ public class Communication extends Activity{
             byte[] buffer = new byte[1024];  // buffer store for the stream
             int bytes; // bytes returned from read()
             String output ;
-            Log.d("Info", "it is the sub thread");
 
             while (true) {
+
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read();
+
                     if(bytes != 0 && bytes != -1)
                     {
                         Log.d("input found", String.valueOf((char)bytes));

@@ -164,8 +164,8 @@ public class Main extends Activity {
         location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                double latitude = 1.03;
-                double longitude  = 107.0;
+                double latitude = 0;
+                double longitude  = 0;
                 //String uri = String.format(Locale.ENGLISH, "geo:0,0?q=%f,%f", latitude, longitude);
                 String uri = String.format(Locale.ENGLISH, "http://128.199.213.135?saddr=%f,%f", latitude, longitude);
 
@@ -213,11 +213,7 @@ public class Main extends Activity {
 
     private void get_location(String str, float a, float b)
     {
-        double latitude = 1.03;
-        double longitude  = 107.0;
-        latitude = a;
-        longitude = b;
-        String uri = String.format(Locale.ENGLISH, "geo:%f,%f", latitude, longitude);
+        String uri = String.format(Locale.ENGLISH, "geo:%f,%f", a, b);
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
         Main.this.startActivity(intent);
     }
