@@ -145,7 +145,7 @@ public class Communication extends Activity{
                     }
                     else if(a_temp == 'E')
                     {
-                        Switch hs = (Switch) findViewById(R.id.switch1);
+                        Switch hs = (Switch) findViewById(R.id.switch3);
                         b_db = sc.nextInt();
                         if(b_db ==1)
                             hs.setChecked(true);
