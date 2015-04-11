@@ -35,6 +35,11 @@
             android:layout_height="wrap_content"
             android:id="@+id/get_location"
             android:text=" Get Location "/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/get_report"
+            android:text=" Get Health Report "/>
     </LinearLayout>
     </LinearLayout>
 

@@ -26,50 +26,23 @@ public class Test extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-//        SQLiteDatabase db = openOrCreateDatabase("shoeload.db", Context.MODE_PRIVATE, null);
-////        refresh_db(db);
-////        Shoeload shoeload = new Shoeload(1.0,2.0,3.0,4.0, 5);
-////        insert_data(db, shoeload);
-////        insert_data(db, shoeload);
-////        insert_data(db, shoeload);
-////        insert_data(db, shoeload);
-////
-////        show_all_data(db);
-//        db.close();
-        //Loadata ld = new Loadata();
-        //ld.save_load(1.0, 2.0, 3.0, 4.0,"2010");
         GraphView graph = (GraphView) findViewById(R.id.graph);
+        GraphView graph_1 = (GraphView) findViewById(R.id.graph_1);
         db = openOrCreateDatabase("shoeload.db", Context.MODE_PRIVATE, null);
         if( db == null)
                 Log.d("Info_Test", "database closed");
         else
                 Log.d("Info_Test", "Database started");
 
-//        DataPoint[] dp =new DataPoint[]{
-//                new DataPoint(0, 7),
-//                new DataPoint(1, 5),
-//                new DataPoint(2,4)
-//        };
 
         ArrayList<DataPoint> dp_a = new ArrayList<DataPoint>();
         dp_a.add(new DataPoint(0,2));
-        //dp_a.add(new DataPoint(1,5));
-
-//        Random rd = new Random();
-//        for(int i = 0; i<=8000; i++)
-//        {
-//            dp = append(dp, new DataPoint(i+5, rd.nextInt(10)));
-//        }
-        //get_data_points(dp);
-        //append(dp, new DataPoint(3, 10));
 
         int i = 1;
         double sum_up =0.0;
         Cursor c = db.rawQuery("SELECT * FROM shoeload", null);
         while(c.moveToNext()){
             sum_up = c.getDouble(c.getColumnIndex("front")) +c.getDouble(c.getColumnIndex("middle"))+c.getDouble(c.getColumnIndex("rare"));
-            //Log.d("Info", c.getInt(c.getColumnIndex("_id"))+ " "+ sum_up + " ");
-            //append(dp, new DataPoint(i, sum_up/300));
             dp_a.add(new DataPoint(i, sum_up/1000));
             i++;
         }
@@ -82,6 +55,33 @@ public class Test extends Activity {
         Log.d("finished","finished redering");
         //show_all_data(db);
         //graph.addSeries(new LineGraphSeries<DataPoint>());
+
+
+        dp = new DataPoint[]{
+            new DataPoint(1, 54),
+            new DataPoint(2, 54),
+            new DataPoint(3, 53),
+            new DataPoint(4, 53),
+            new DataPoint(5, 53),
+            new DataPoint(6, 52),
+            new DataPoint(7, 52),
+            new DataPoint(8, 52),
+            new DataPoint(9, 52),
+            new DataPoint(10, 52),
+            new DataPoint(11, 52),
+            new DataPoint(12, 52),
+            new DataPoint(13, 52),
+            new DataPoint(14, 52),
+            new DataPoint(14, 52),
+            new DataPoint(14, 51)
+        };
+        series = new LineGraphSeries<DataPoint>(dp);
+        graph_1.addSeries(series);
+
+
+
+
+
 
     }
 

@@ -127,6 +127,16 @@ public class Main extends Activity {
         });
 
 
+        Button b4 = (Button) findViewById(R.id.get_report);
+        b4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent it = new Intent(Main.this, Test.class);
+                startActivity(it);
+            }
+        });
+
+
         //
 
         lstDevices = new ArrayList();
@@ -213,6 +223,8 @@ public class Main extends Activity {
 
     private void get_location(String str, float a, float b)
     {
+        a = (float)Math.floor(a/100) + (float)((a - Math.floor(a))/60) + (float)(((int)a%100)/60.0);
+        b = (float)Math.floor(b/100) + (float)((b - Math.floor(b))/60) + (float)(((int)b%100)/60.0);
         String uri = String.format(Locale.ENGLISH, "geo:%f,%f", a, b);
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
         Main.this.startActivity(intent);
