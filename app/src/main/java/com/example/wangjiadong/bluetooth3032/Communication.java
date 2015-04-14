@@ -334,7 +334,7 @@ public class Communication extends Activity{
 
                     if(bytes != 0 && bytes != -1)
                     {
-                        Log.d("input found", String.valueOf((char)bytes));
+                       // Log.d("input found", String.valueOf((char)bytes));
                         mHandler.obtainMessage(bytes).sendToTarget();
                     }
                 } catch (IOException e) {
