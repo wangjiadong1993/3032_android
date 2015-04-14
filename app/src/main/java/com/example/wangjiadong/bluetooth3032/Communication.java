@@ -47,6 +47,7 @@ public class Communication extends Activity{
     private Handler mHandler;
     private SQLiteDatabase db;
     private Shoeload sl;
+    private int step_global;
     private int command = 0;
     private void show_temp(String input){
         Log.d("str len", Integer.toString(input.length()));
@@ -130,6 +131,7 @@ public class Communication extends Activity{
                     {
                         b_db = sc.nextInt();
                         update_view("Step "+b_db);
+                        step_global = b_db;
                         temp="";
                     }
                     else if(a_temp == 'S')
@@ -194,8 +196,10 @@ public class Communication extends Activity{
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Communication.this , Test.class);
+                intent.putExtra("step", step_global);
+                Log.d("step", "it is "+ step_global);
                 db.close();
-                Log.d("Info", "DataBase already closed.");
+                Log.d("Info", "the status is " + db.isOpen());
                 startActivity(intent);
             }
         });

@@ -2,6 +2,7 @@ package com.example.wangjiadong.bluetooth3032;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.activeandroid.ActiveAndroid;
 import com.jjoe64.graphview.GraphView;
@@ -22,6 +24,7 @@ import java.util.Random;
 
 public class Test extends Activity {
     SQLiteDatabase db;
+    private int step = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,28 +36,30 @@ public class Test extends Activity {
                 Log.d("Info_Test", "database closed");
         else
                 Log.d("Info_Test", "Database started");
-
-
+        Intent intent = getIntent();
+        step = intent.getIntExtra("step", 0);
+        Log.d("step", "it is "+ step);
+        TextView tv  = (TextView) findViewById(R.id.text);
+        tv.setText("Your Daily Step Count is : " + step + "\n The Calorie Consumption is :" + Math.floor(1000*step*0.57*50/(2000))/1000 + "KJ");
         ArrayList<DataPoint> dp_a = new ArrayList<DataPoint>();
-        dp_a.add(new DataPoint(0,2));
+        //dp_a.add(new DataPoint(0,2));
 
         int i = 1;
         double sum_up =0.0;
         Cursor c = db.rawQuery("SELECT * FROM shoeload", null);
         while(c.moveToNext()){
-            sum_up = c.getDouble(c.getColumnIndex("front")) +c.getDouble(c.getColumnIndex("middle"))+c.getDouble(c.getColumnIndex("rare"));
-            dp_a.add(new DataPoint(i, sum_up/1000));
-            i++;
+            sum_up = c.getDouble(c.getColumnIndex("front"));
+            if(sum_up >35) {
+                dp_a.add(new DataPoint(i, sum_up));
+                i++;
+            }
         }
 
         DataPoint[] dp = dp_a.toArray(new DataPoint[dp_a.size()]);
 
         LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(dp);
-        Log.d("Lala", Integer.toString(dp.length));
+       // Log.d("Lala", Integer.toString(dp.length));
         graph.addSeries(series);
-        Log.d("finished","finished redering");
-        //show_all_data(db);
-        //graph.addSeries(new LineGraphSeries<DataPoint>());
 
 
         dp = new DataPoint[]{
@@ -78,7 +83,7 @@ public class Test extends Activity {
         series = new LineGraphSeries<DataPoint>(dp);
         graph_1.addSeries(series);
 
-
+        db.close();
 
 
 

@@ -22,10 +22,11 @@
         android:text="Your Monthly Weight Tracking:"/>
     <com.jjoe64.graphview.GraphView
         android:layout_width="match_parent"
-        android:layout_height="200dip"
+        android:layout_height="100dip"
         android:id="@+id/graph_1" />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/text"
         android:text="Today's Step Count: 298.\nCalorie consumption is 2000 KJ"/>
 </LinearLayout>
